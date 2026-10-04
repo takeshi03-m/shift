@@ -1,0 +1,136 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>シフト自動作成</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+<style>
+:root{--bg:#f4f5f8;--fg:#1b2133;--mu:#7b8296;--ln:#d5d9e3;--hd:#e6e9f1;--ac:#2b4a7a;--on:#fff;--wi:#fdf0c9;--ng:#f8d4cf;--su:#c0392b;--sa:#2c6fb7;--x:#c3c8d4;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#151927;--fg:#e6e9f2;--mu:#8e96ab;--ln:#2e3550;--hd:#20263a;--ac:#8fb2ee;--on:#1d2336;--wi:#4a3f1a;--ng:#5a2a26;--su:#ff8a7a;--sa:#7db4f2;--x:#4a5270}}
+:root[data-theme=dark]{--bg:#151927;--fg:#e6e9f2;--mu:#8e96ab;--ln:#2e3550;--hd:#20263a;--ac:#8fb2ee;--on:#1d2336;--wi:#4a3f1a;--ng:#5a2a26;--su:#ff8a7a;--sa:#7db4f2;--x:#4a5270}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 "Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif}
+header{padding:12px 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+h1{font-size:17px;margin:0 8px 0 0}
+button,select,input{font:inherit;color:var(--fg);background:var(--on);border:1px solid var(--ln);border-radius:6px;padding:4px 9px}
+button{cursor:pointer}button:focus-visible,select:focus-visible,td:focus-visible{outline:2px solid var(--ac)}
+.pr{background:var(--ac);border-color:var(--ac);color:var(--bg);font-weight:700}
+.tab.a{background:var(--ac);color:var(--bg);border-color:var(--ac)}
+.hint{padding:0 14px 8px;color:var(--mu);font-size:12px}
+.wrap{overflow:auto;max-height:80dvh;padding:0 14px 20px;-webkit-overflow-scrolling:touch}
+th{position:sticky;top:0;z-index:2}thead .nm{z-index:3}
+button,select,input,td{touch-action:manipulation}
+table{border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{border:1px solid var(--ln);text-align:center;font-size:11px;min-width:58px;height:30px;padding:0 2px;white-space:nowrap}
+th{background:var(--hd)}th.su{color:var(--su)}th.sa{color:var(--sa)}
+.nm{position:sticky;left:0;background:var(--hd);min-width:84px;text-align:left;padding:0 6px;font-size:12px;z-index:1}
+td.on{background:var(--on);font-weight:700}td.x{color:var(--x)}td.w{background:var(--wi)}td.bl{background:var(--wi);opacity:.75}td.ab{background:var(--ng)}
+tbody td{cursor:pointer}tr.cf td{cursor:default;background:var(--bg)}
+tr.cf button{padding:0 6px}tr.cf select{padding:0;font-size:11px}
+td.ng{background:var(--ng);color:var(--su);font-weight:700}
+.md{position:fixed;inset:0;background:#0007;display:flex;align-items:center;justify-content:center;padding:12px;z-index:9}.md[hidden]{display:none}
+.bx{background:var(--bg);border:1px solid var(--ln);border-radius:10px;padding:16px;width:min(360px,100%);max-height:90%;overflow:auto}
+.bx h3{margin:0 0 10px;font-size:15px}.g{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0;align-items:center}
+.in{background:var(--wi);padding:6px 8px;border-radius:6px;margin:0 0 8px}
+textarea{width:100%;height:260px;box-sizing:border-box}
+#ttl{display:none}
+@media print{@page{size:A4 landscape;margin:8mm}header,.hint,tr.cf,.md{display:none!important}#ttl{display:block;font-size:14px;font-weight:700;margin:0 14px 6px}body{background:#fff;color:#000}.wrap{overflow:visible;max-height:none;padding:0}th,td{min-width:0;font-size:9px;height:20px;border-color:#444}.nm{position:static;min-width:60px}td.w,td.bl{background:#fff}}
+@media screen and (max-width:640px){
+header{padding:8px 10px;gap:6px}h1{font-size:15px;margin:0;order:1;flex:1 1 auto}
+button,select,input{font-size:16px;min-height:40px}
+header button:nth-of-type(n+4){order:2;flex:0 0 auto}#mo{order:3;flex:1 1 55%;min-width:0}#hf{order:3;flex:1 1 35%}.tab{order:4;flex:1 1 45%}header .pr{order:5;flex:1 1 100%}
+th,td{min-width:66px;height:42px;font-size:12px}
+.nm{min-width:74px;font-size:13px}
+tr.cf button{min-width:32px;min-height:32px;padding:0}
+tr.cf select{min-height:34px;font-size:13px}
+.hint{padding:0 10px 6px;font-size:11px}.wrap{padding:0 10px 20px;max-height:none}th{position:static}thead .nm{z-index:1}
+.md{align-items:flex-end;padding:0}
+.bx{width:100%;border-radius:14px 14px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px))}
+.bx button{min-height:48px;flex:1 1 40%}
+.bx select{min-height:46px}.bx label{display:flex;align-items:center;gap:8px;padding:6px 0}.bx input[type=checkbox]{min-height:0;width:22px;height:22px}
+}
+.sr{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:0 0 8px;margin:0 0 8px;border-bottom:1px solid var(--ln)}
+.sr input[type=text]{flex:1 1 100%;min-width:0}
+.sr button{flex:0 0 auto;min-height:40px;min-width:44px}
+.sr label{flex:1 1 auto;display:flex;align-items:center;gap:4px;padding:0}
+.sr input[type=checkbox]{min-height:0;width:20px;height:20px}
+tr.sp td{height:12px;border:0;background:transparent;cursor:default;padding:0}
+@media print{tr.sp td{height:8px}}
+</style></head><body>
+<header><h1>シフト自動作成</h1><input type="month" id="mo" aria-label="月"><select id="hf" aria-label="前半後半"><option value="1">1〜15日</option><option value="2">16日〜月末</option></select>
+<button class="tab" id="t1">希望入力</button><button class="tab" id="t2">シフト</button>
+<button class="pr" onclick="gen()">シフトを自動作成</button><button onclick="window.print()">印刷</button><button onclick="stf()">スタッフ編集</button></header>
+<div class="hint" id="hint"></div><div id="ttl"></div><div class="wrap"><table id="tb"></table></div>
+<div class="md" id="md" hidden><div class="bx" id="bx" role="dialog"></div></div>
+<script>
+const $=s=>document.querySelector(s),WD='日月火水木金土',now=new Date();
+let S=ld()||{y:now.getFullYear(),m:now.getMonth()+1,h:1,mode:'wish',staff:Array.from({length:17},(_,i)=>({id:i,name:'スタッフ'+(i+1),g:0})),nid:17,p:{}},E=[0,0],Dr=[];
+if(typeof S.staff[0]=='string'){S.staff=S.staff.map((n,i)=>({id:i,name:n,g:0}));S.nid=S.staff.length}
+function ld(){try{return JSON.parse(localStorage.getItem('shift_v1'))}catch(e){return null}}
+function sv(){try{localStorage.setItem('shift_v1',JSON.stringify(S))}catch(e){}}
+function P(){const k=S.y+'-'+S.m+'-'+S.h;return S.p[k]||(S.p[k]={wish:{},shift:{},need:{},start:{}})}
+function rg(){return S.h==1?[1,15]:[16,new Date(S.y,S.m,0).getDate()]}
+const dw=d=>new Date(S.y,S.m-1,d).getDay(),gn=d=>P().need[d]??({5:7,6:8}[dw(d)]||6),gs=d=>P().start[d]??18;
+const T=[];for(let h=11;h<=24;h+=.5)T.push([h,h]);
+const sel=(id,a,c)=>`<select id="${id}">`+a.map(v=>`<option value="${v[0]}"${String(v[0])==String(c)?' selected':''}>${v[1]}</option>`).join('')+'</select>';
+const wt=w=>(w.f=='any'?'何時でも':w.f+'〜'+(w.t||''))+(w.e?'・早':'');
+const st=s=>s.x?'欠':s.s+' → '+s.e;
+function render(){
+ const [a,b]=rg(),p=P(),sh=S.mode=='shift';
+ $('#mo').value=S.y+'-'+String(S.m).padStart(2,'0');$('#hf').value=S.h;
+ $('#t1').className='tab'+(sh?'':' a');$('#t2').className='tab'+(sh?' a':'');
+ $('#ttl').textContent=S.y+'年'+S.m+'月 '+a+'〜'+b+'日 シフト表';
+ $('#hint').textContent=sh?'セルをタップして時間変更・追加・欠勤登録。黄色=希望あり・未採用(代打候補)、／=希望なし。':'LINEで届いた希望を日付のセルに入力してください。／=希望なし。名前をタップするとスタッフの追加・削除・並べ替えができます。';
+ let h='<thead><tr><th class="nm">'+S.m+'月</th>',D=[];
+ for(let d=a;d<=b;d++){D.push(d);const w=dw(d);h+=`<th class="${w==0?'su':w==6?'sa':''}">${d}<br>${WD[w]}</th>`}
+ h+='<th>回数</th></tr></thead><tbody><tr class="cf"><td class="nm">必要人数</td>'+D.map(d=>`<td><button onclick="nd(${d},-1)" aria-label="減らす">−</button> <b>${gn(d)}</b> <button onclick="nd(${d},1)" aria-label="増やす">＋</button></td>`).join('')+'<td></td></tr>';
+ h+='<tr class="cf"><td class="nm">基本開始</td>'+D.map(d=>`<td><select onchange="bs(${d},this.value)">`+[13,16,17,18,19].map(v=>`<option${v==gs(d)?' selected':''}>${v}</option>`).join('')+'</select></td>').join('')+'<td></td></tr>';
+ const cn=D.map(()=>0);
+ for(const u of S.staff){const i=u.id;h+=`<tr><td class="nm" onclick="stf()">${esc(u.name)}</td>`;let c=0;
+  D.forEach((d,j)=>{const k=i+'_'+d,w=p.wish[k],s=p.shift[k];let t='',cl='';
+   if(!sh){if(w){t=wt(w);cl='w'}else{t='／';cl='x'}}
+   else if(s){t=st(s);cl=s.x?'ab':'on';if(!s.x){c++;cn[j]++}}
+   else if(w)cl='bl';else{t='／';cl='x'}
+   h+=`<td class="${cl}" tabindex="0" onclick="ed(${i},${d})" onkeydown="if(event.key=='Enter')ed(${i},${d})">${t}</td>`});
+  h+=`<td>${sh?c:''}</td></tr>`+(u.g?`<tr class="sp"><td colspan="${D.length+2}"></td></tr>`:'')}
+ h+='<tr><td class="nm"><b>'+(sh?'出勤人数':'希望者数')+'</b></td>';
+ D.forEach((d,j)=>{if(!sh)cn[j]=S.staff.reduce((q,u)=>q+(p.wish[u.id+'_'+d]?1:0),0);h+=`<td><b>${cn[j]}</b></td>`});
+ h+='<td></td></tr><tr><td class="nm"><b>不足</b></td>';
+ D.forEach((d,j)=>{const m=gn(d)-cn[j];h+=m>0?`<td class="ng">⚠${m}名</td>`:'<td>−</td>'});
+ $('#tb').innerHTML=h+'<td></td></tr></tbody>';sv()}
+const nm=i=>(S.staff.find(u=>u.id==i)||{name:''}).name;
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function nd(d,v){P().need[d]=Math.max(0,gn(d)+v);render()}
+function bs(d,v){P().start[d]=+v;render()}
+function gen(){
+ const [a,b]=rg(),p=P(),n=S.staff.length,cnt=Array(S.nid).fill(0),sk=Array(S.nid).fill(0);p.shift={};
+ for(let d=a;d<=b;d++){const s0=gs(d),need=gn(d),c=[];
+  S.staff.forEach((u,x)=>{const i=u.id,w=p.wish[i+'_'+d];if(w)c.push({i,x,w,ok:w.f=='any'||w.f<=s0?1:0})});
+  c.sort((x,y)=>y.ok-x.ok||cnt[x.i]-cnt[y.i]||sk[y.i]-sk[x.i]||(x.x+d)%n-(y.x+d)%n);
+  c.forEach((o,r)=>{if(r<need){cnt[o.i]++;p.shift[o.i+'_'+d]={s:o.w.f=='any'?s0:Math.max(s0,o.w.f),e:o.w.e?'早':(o.w.t||23.5)}}else sk[o.i]++})}
+ S.mode='shift';render()}
+function op(h){$('#bx').innerHTML=h;$('#md').hidden=false}
+function cl(){$('#md').hidden=true;render()}
+$('#md').onclick=e=>{if(e.target.id=='md')cl()};
+function ed(i,d){E=[i,d];const k=i+'_'+d,p=P(),w=p.wish[k],s=p.shift[k];
+ let h=`<h3>${esc(nm(i))}　${S.m}/${d}(${WD[dw(d)]})</h3>`;
+ if(S.mode=='wish'){
+  h+=`<label><input type="checkbox" id="ea"${w&&w.e?' checked':''}> 早上がり希望</label><div class="g"><button onclick="qw('any')">何時からでも</button><button onclick="qw(17)">17:00〜</button><button onclick="qw(18)">18:00〜</button><button onclick="qw('x')">希望なし ／</button></div>
+  <div class="g">時間指定 開始${sel('f',T,w&&w.f!='any'?w.f:18)} 終了${sel('t',[['','指定なし'],...T],w&&w.t||'')}<button class="pr" onclick="qw('c')">保存</button></div>`}
+ else{
+  if(!s)h+=`<p class="in">${w?'この日はシフト希望あり<br>出勤可能：'+wt(w):'この日は希望なし(／)です'}</p>`;
+  const ok=s&&!s.x;
+  h+=`<div class="g">開始${sel('s',T,ok?s.s:w&&w.f!='any'?Math.max(gs(d),w.f):gs(d))} 終了${sel('e',[...T,['早','早上がり']],ok?s.e:w&&w.e?'早':w&&w.t||23.5)}</div>
+  <div class="g"><button class="pr" onclick="ss()">${ok?'更新':'シフトへ追加'}</button>${s?'<button onclick="rm()">シフトから外す</button>':''}${s&&!s.x?'<button onclick="ab()">欠勤</button>':''}</div>`}
+ op(h+'<div class="g"><button onclick="cl()">閉じる</button></div>')}
+function qw(v){const [i,d]=E,k=i+'_'+d,W=P().wish;
+ if(v=='x')delete W[k];else{const o=v=='c'?{f:+$('#f').value}:{f:v};const t=v=='c'&&$('#t').value;if(t)o.t=+t;if($('#ea').checked)o.e=1;W[k]=o}cl()}
+function ss(){const [i,d]=E,e=$('#e').value;P().shift[i+'_'+d]={s:+$('#s').value,e:e=='早'?'早':+e};cl()}
+function rm(){const [i,d]=E;delete P().shift[i+'_'+d];cl()}
+function ab(){const [i,d]=E;P().shift[i+'_'+d]={x:1};cl()}
+function stf(){Dr=S.staff.map(u=>({...u}));sr()}
+function sr(k){const t=$('#bx').scrollTop;op(`<h3>スタッフ編集</h3><div class="g"><button onclick="ad()">＋ スタッフを追加</button><button class="pr" onclick="sst()">保存</button><button onclick="cl()">閉じる</button></div><p class="in">${Dr.length}名。↑↓で並び替え、「下に行間」でその下に空白行を入れます。保存を押すまで反映されません。</p>`+Dr.map((u,j)=>`<div class="sr"><input type="text" value="${esc(u.name)}" oninput="Dr[${j}].name=this.value" aria-label="名前"><button onclick="mv(${j},-1)" aria-label="上へ">↑</button><button onclick="mv(${j},1)" aria-label="下へ">↓</button><label><input type="checkbox"${u.g?' checked':''} onchange="Dr[${j}].g=this.checked?1:0"> 下に行間</label><button onclick="dl(${j})">削除</button></div>`).join(''));$('#bx').scrollTop=k?1e5:t}
+function ad(){Dr.push({id:S.nid++,name:'スタッフ'+(Dr.length+1),g:0});sr(1)}
+function mv(j,d){const k=j+d;if(k<0||k>=Dr.length)return;[Dr[j],Dr[k]]=[Dr[k],Dr[j]];sr()}
+function dl(j){Dr.splice(j,1);sr()}
+function sst(){S.staff=Dr.map(u=>({...u,name:u.name.trim()||'名前なし'}));cl()}
+$('#mo').onchange=e=>{const v=e.target.value.split('-');if(v[1]){S.y=+v[0];S.m=+v[1];render()}};
+$('#hf').onchange=e=>{S.h=+e.target.value;render()};
+$('#t1').onclick=()=>{S.mode='wish';render()};$('#t2').onclick=()=>{S.mode='shift';render()};
+render();
+</script></body></html>
